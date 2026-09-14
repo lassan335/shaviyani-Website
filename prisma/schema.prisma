@@ -1,0 +1,91 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+model Product {
+  id           String      @id @default(cuid())
+  slug         String      @unique
+  name         String
+  team         String
+  collection   String
+  league       String?
+  mode         String // "instant" | "preorder"
+  price        Int // MVR, integer minor-unit-free (whole rufiyaa)
+  preorderEta  String?
+  description  String?
+  gradientFrom String
+  gradientTo   String
+  image        String? // path under /public, e.g. "/Products/Feleyla.jpg"
+  materials    String // comma-separated list
+  sizes        String // comma-separated list
+  featured     Boolean     @default(false)
+  createdAt    DateTime    @default(now())
+  orderItems   OrderItem[]
+}
+
+model Order {
+  id            String           @id @default(cuid())
+  orderNumber   String           @unique
+  customerName  String
+  customerEmail String
+  customerPhone String?
+  address       String
+  island        String?
+  subtotal      Int
+  shippingCost  Int              @default(0)
+  supplierCost  Int              @default(0)
+  status        String           @default("Placed")
+  isPreorder    Boolean          @default(false)
+  createdAt     DateTime         @default(now())
+  items         OrderItem[]
+  statusLogs    OrderStatusLog[]
+}
+
+model OrderItem {
+  id        String   @id @default(cuid())
+  orderId   String
+  order     Order    @relation(fields: [orderId], references: [id])
+  productId String?
+  product   Product? @relation(fields: [productId], references: [id])
+  name      String
+  material  String
+  size      String
+  qty       Int
+  price     Int
+}
+
+model OrderStatusLog {
+  id        String   @id @default(cuid())
+  orderId   String
+  order     Order    @relation(fields: [orderId], references: [id])
+  status    String
+  changedAt DateTime @default(now())
+}
+
+model QuoteRequest {
+  id          String      @id @default(cuid())
+  teamName    String
+  contactName String
+  email       String
+  phone       String?
+  notes       String?
+  status      String      @default("New")
+  createdAt   DateTime    @default(now())
+  items       QuoteItem[]
+}
+
+model QuoteItem {
+  id             String       @id @default(cuid())
+  quoteRequestId String
+  quoteRequest   QuoteRequest @relation(fields: [quoteRequestId], references: [id])
+  style          String
+  material       String
+  size           String
+  qty            Int
+}
