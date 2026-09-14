@@ -9,3 +9,6 @@ npm-debug.log*
 
 # Reference material, not a site asset
 *.pdf
+
+.vercel
+.env*

@@ -39,17 +39,18 @@ these get set up — until then, treat every run as a **local preflight only**, 
   migrate/seed/push command hangs or errors with "database is locked," stop the dev server first.
 - **Feature flags.** None exist.
 
-## Deployment coordinates — none yet
-- **Prod URL:** none — not deployed anywhere.
-- **Hosting platform:** none chosen.
-- **Database:** local SQLite file only (`prisma/dev.db` via `DATABASE_URL` in `.env`); no managed DB.
-- **Git remote:** none — `git remote -v` returns nothing. Local `main` branch only.
-- **Payment gateway:** none integrated (checkout does not charge a card — see `finsec-analyst`'s notes).
+## Deployment coordinates — live as of 2026-09-15
+Full detail lives in `docs/DEPLOY.md` (read it first, every run — this is a summary, not the source of
+truth). In brief: **Vercel** (project `lassan335/shaviyani-pro`, prod URL
+https://shaviyani-pro.vercel.app), **Supabase Postgres** (pooler host only — the true direct host is
+IPv6-only and unreachable from this dev machine, see the runbook's Gotchas), git remote `origin` →
+github.com/lassan335/shaviyani-Website, branch `master`. No payment gateway integrated (checkout does
+not charge a card — see `finsec-analyst`'s notes). No admin authentication — `/admin` is live and
+public with zero access control; treat any task touching it as high-priority, not routine.
 
-Until a host/DB/remote/payment-gateway are chosen, your job on this project is: run the Preflight Gate
-locally (build, and any tests/lint that exist), report drift as "N/A — no remote/host configured," and
-stop. Do not invent coordinates or assume a target. When the user does pick a host and DB, update every
-`{{...}}`-shaped gap in this file for real before treating a "deploy" request as executable.
+Deploys today are a manual `vercel --prod --yes` — there is no GitHub-integration auto-deploy configured.
+Local dev and production currently share **the same** Supabase database (no separate staging DB exists
+yet) — treat schema pushes and reseeds as live-data operations, not sandboxed experiments.
 
 ## Credential & key inventory (you MAINTAIN it — IN THE RUNBOOK FILE, names/locations only, NEVER values)
 The full credential/key map lives in the runbook's "Credential inventory" table — that table is the source of truth, not this prompt. On every run: read it, reconcile it against `.env*` files, the host's env settings, the CI secrets, and the local tool config, then write any change back into the runbook (and commit it). **Never echo a secret's value** in output, logs, commits, or the file — store only the variable NAME and WHERE it lives.

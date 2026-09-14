@@ -38,26 +38,30 @@ You maintain TWO ledger files under `.claude/` and nothing else:
 
 ## Project-specific wiring
 This is **Shaviyani Pro** (jersey/apparel division of Shaviyani Holdings) — a Next.js 14 (App Router)
-storefront + admin order-pipeline app, with Prisma/SQLite as the data layer (`prisma/schema.prisma`,
-local file `prisma/dev.db`). No cloud host, no Postgres, no payment gateway, and no `origin` git remote
-are configured yet — everything currently runs local-only. Update this section once any of that changes.
+storefront + admin order-pipeline app, with Prisma/Postgres (Supabase) as the data layer
+(`prisma/schema.prisma`). **Live since 2026-09-15**: https://shaviyani-pro.vercel.app (Vercel project
+`lassan335/shaviyani-pro`), git remote `origin` → github.com/lassan335/shaviyani-Website (branch
+`master`). Full coordinates in `docs/DEPLOY.md` — that file is the source of truth; update this section
+if it drifts.
 
 - **Who executes deploys?** The `release-engineer` agent (`.claude/agents/release-engineer.md`), via its
-  runbook at `docs/DEPLOY.md`. There is nothing to deploy to yet — until a host/DB/remote is chosen,
-  release-engineer's job is local preflight (build/lint clean, schema in sync) only. Do not invent
-  deploy coordinates; reference the runbook.
+  runbook at `docs/DEPLOY.md`. Deploys are manual (`vercel --prod --yes`) — no GitHub auto-deploy is
+  configured, so a merge to `master` does NOT ship by itself; someone still has to run the deploy.
 - **Real commands:** `npm run build` (runs `prisma generate && next build`), `npm run dev`,
-  `npx prisma db push` (schema sync — this project has no migration history yet, just `db push` against
-  SQLite), `node prisma/seed.js` (seed/reseed demo data).
+  `npx prisma db push` (schema sync — no migration history yet, just `db push`; stop the dev server
+  first on Windows or the Prisma engine DLL lock causes EPERM), `node prisma/seed.js` (seed/reseed).
+  **Local dev and prod share the same Supabase database** — there is no separate staging DB, so treat
+  `db push`/seed runs as live-data operations.
 - **Reviews required before anything ships:**
   - Any change to `app/actions.js`, `app/checkout/**`, `app/api/**`, or `prisma/schema.prisma` (money
     fields, order creation, customer PII) → `finsec-analyst`.
-  - **Known gap, flag on every relevant task:** `/admin` has no authentication — anyone with the URL can
-    view customer PII and change order status. Any task touching `/admin` should note this; a task to add
-    admin auth should be treated as high priority, not routine.
+  - **Known gap, flag on every relevant task:** `/admin` has no authentication and is now **publicly
+    reachable** at the live prod URL — anyone with the link can view customer PII and change order
+    status. Any task touching `/admin` should note this; a task to add admin auth should be treated as
+    high priority, not routine.
   - UI/visual changes → no dedicated UX agent configured yet; call it out as a manual check.
-- **Branch convention:** no git remote configured yet — coordinate via local branches off `main` until
-  one is added. Update this line once `origin` exists.
+- **Branch convention:** feature branches off `master`; PRs target `master`. Remember a merge alone
+  doesn't deploy — flag when a merged task still needs someone to run `vercel --prod`.
 
 ## Getting timestamps / sequence numbers
 Use `Bash` only for read-only housekeeping the ledger needs — e.g. the current timestamp (`date '+%Y-%m-%d %H:%M'`) for `updated_at`/`started`/`completed_at`, and to compute the next `NNN` by scanning existing IDs. Never use Bash to run builds, migrations, deploys, or any code-changing command.

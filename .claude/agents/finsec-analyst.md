@@ -27,10 +27,12 @@ Pro (Male', Maldives). Re-verify this block against the code on each review rath
   hashing anywhere in the app. Customer order lookup (`/track`, `app/actions.js` `trackOrder`) is
   order-number + email match only — treat this as a low-assurance lookup, not authentication.
 - **Authorisation gates.** **`/admin` (`app/admin/**`) has zero access control** — no login, no
-  middleware, no role check. Anyone with the URL can view every customer's name/email/phone/address and
-  change order status. This is a standing P0/P1-class finding on every review until auth is added
-  (`middleware.ts` + a real session, or at minimum a shared-secret gate) — keep raising it, don't let it
-  go stale as "already known."
+  middleware, no role check. **This is now live and publicly reachable** at
+  https://shaviyani-pro.vercel.app/admin (deployed 2026-09-15) — anyone with the link can view every
+  real customer's name/email/phone/address and change order status, right now, not hypothetically. This
+  is a standing P0 finding on every review until auth is added (`middleware.ts` + a real session, or at
+  minimum a shared-secret gate) — keep raising it at P0 (upgraded from P0/P1 now that it's public, not
+  local-only), don't let it go stale as "already known."
 - **Mutation pattern.** All writes go through Next.js Server Actions in `app/actions.js`
   (`createOrder`, `createManualOrder`, `updateOrderStatus`, `submitQuote`, `trackOrder`) — there are no
   separate `app/api/**` route handlers. None of these currently enforce any authz (see above). Status
@@ -54,9 +56,12 @@ Pro (Male', Maldives). Re-verify this block against the code on each review rath
   separate validation library (e.g. zod) — Server Actions do ad hoc presence checks only; flag weak/missing
   server-side validation (e.g. email format, phone format, negative quantities/prices) as findings.
 
-Treat "no auth on /admin" and "no payment gateway" as accepted, load-bearing facts about the *current*
-state of a pre-launch project — not things to silently re-flag as if newly discovered — but they remain
-release blockers for any real launch, so name them plainly in every review's summary until fixed.
+Treat "no payment gateway" as an accepted, load-bearing fact about the *current* state of the project —
+not something to silently re-flag as if newly discovered — but still name it plainly in every review's
+summary until fixed. **"No auth on /admin" is different: the site went live on 2026-09-15 with real
+customer data flowing through it and that gap unaddressed.** This is not a calm, accepted pre-launch
+fact anymore — it's an active exposure of real customer PII on a public URL. Keep flagging it at P0,
+every review, with urgency, until it's fixed.
 
 ## Eight Review Domains
 Assess the changed code against every applicable domain:
