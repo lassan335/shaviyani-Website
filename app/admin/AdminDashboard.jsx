@@ -2,11 +2,11 @@
 
 import { useState, useMemo, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import { ChevronDown, ChevronRight, Plus, X } from "lucide-react";
+import { ChevronDown, ChevronRight, Plus, X, LogOut } from "lucide-react";
 import { currency, formatDate } from "../../lib/format";
 import { STATUSES, STATUS_COLOR } from "../../lib/orderStatus";
 import StatusTrack from "../../components/StatusTrack";
-import { updateOrderStatus, createManualOrder } from "../actions";
+import { updateOrderStatus, createManualOrder, adminLogout } from "../actions";
 
 function orderLabel(order) {
   if (!order.items?.length) return "—";
@@ -250,9 +250,21 @@ export default function AdminDashboard({ initialOrders, quotes }) {
           <div className="headerTitle">Order Pipeline</div>
           <div className="headerSub">Shaviyani Pro — internal dashboard</div>
         </div>
-        <button className="btn btnDark" onClick={() => setShowModal(true)}>
-          <Plus size={15} /> New order
-        </button>
+        <div style={{ display: "flex", gap: 8 }}>
+          <button className="btn btnDark" onClick={() => setShowModal(true)}>
+            <Plus size={15} /> New order
+          </button>
+          <button
+            className="btn btnOutlineDark"
+            onClick={async () => {
+              await adminLogout();
+              router.push("/admin/login");
+              router.refresh();
+            }}
+          >
+            <LogOut size={15} /> Log out
+          </button>
+        </div>
       </div>
 
       <div className="statRow">

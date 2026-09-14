@@ -26,13 +26,16 @@ Pro (Male', Maldives). Re-verify this block against the code on each review rath
 - **Authentication mechanism.** **None exists.** There are no user accounts, no sessions, no password
   hashing anywhere in the app. Customer order lookup (`/track`, `app/actions.js` `trackOrder`) is
   order-number + email match only — treat this as a low-assurance lookup, not authentication.
-- **Authorisation gates.** **`/admin` (`app/admin/**`) has zero access control** — no login, no
-  middleware, no role check. **This is now live and publicly reachable** at
-  https://shaviyani-pro.vercel.app/admin (deployed 2026-09-15) — anyone with the link can view every
-  real customer's name/email/phone/address and change order status, right now, not hypothetically. This
-  is a standing P0 finding on every review until auth is added (`middleware.ts` + a real session, or at
-  minimum a shared-secret gate) — keep raising it at P0 (upgraded from P0/P1 now that it's public, not
-  local-only), don't let it go stale as "already known."
+- **Authorisation gates.** **Fixed 2026-09-15.** `/admin` is now gated by `middleware.js` (root of the
+  repo) — every `/admin/:path*` route except `/admin/login` requires a signed `admin_session` cookie
+  (HMAC-SHA256 via Web Crypto, `lib/adminAuth.js`, 8-hour TTL) or it redirects to `/admin/login`. Login
+  (`adminLogin` in `app/actions.js`) checks a single shared password against `ADMIN_PASSWORD` (env var)
+  and sets the cookie `httpOnly`, `secure` in production, `sameSite: "lax"`. This is a **single shared
+  password for one admin user**, not per-user accounts/roles — reasonable for a solo operator today, but
+  re-flag (not P0, more like P2/INFO) if the team grows and multiple people need distinguishable access,
+  or if `ADMIN_PASSWORD`/`ADMIN_SESSION_SECRET` ever end up logged/committed/exposed (they were pasted in
+  a chat session during setup — rotating them periodically is reasonable). Verify on each review that
+  `middleware.js`'s matcher still covers the full `/admin` surface as new admin routes get added.
 - **Mutation pattern.** All writes go through Next.js Server Actions in `app/actions.js`
   (`createOrder`, `createManualOrder`, `updateOrderStatus`, `submitQuote`, `trackOrder`) — there are no
   separate `app/api/**` route handlers. None of these currently enforce any authz (see above). Status
@@ -58,10 +61,9 @@ Pro (Male', Maldives). Re-verify this block against the code on each review rath
 
 Treat "no payment gateway" as an accepted, load-bearing fact about the *current* state of the project —
 not something to silently re-flag as if newly discovered — but still name it plainly in every review's
-summary until fixed. **"No auth on /admin" is different: the site went live on 2026-09-15 with real
-customer data flowing through it and that gap unaddressed.** This is not a calm, accepted pre-launch
-fact anymore — it's an active exposure of real customer PII on a public URL. Keep flagging it at P0,
-every review, with urgency, until it's fixed.
+summary until fixed. Admin auth (see above) shipped 2026-09-15, closing what was the top P0 — but it's a
+single shared password, not per-user accounts, so keep it in view as scope grows rather than treating it
+as permanently solved.
 
 ## Eight Review Domains
 Assess the changed code against every applicable domain:

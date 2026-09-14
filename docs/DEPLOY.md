@@ -61,6 +61,8 @@ authentication yet — see the Hard Gaps section before treating this as launch-
 | `DATABASE_URL` | Vercel env (Production, Preview); local `.env` | Supabase pooler connection, app runtime |
 | `DIRECT_URL` | Vercel env (Production, Preview — Production only initially, added to Preview same session); local `.env` | Supabase pooler (session mode), Prisma migrations |
 | `NEXTAUTH_SECRET` | Vercel env (Production, Preview) | **Orphaned** — pre-dates this deploy (already present when the Vercel project was first linked, origin unknown/unremembered by the user). The app has no NextAuth integration today; this is unused. Leave it alone (removing it is harmless but pointless) unless real auth gets added, at which point re-evaluate whether to reuse or rotate it. |
+| `ADMIN_PASSWORD` | Vercel env (Production, Preview); local `.env` | The single shared password gating `/admin` (see `lib/adminAuth.js`, `middleware.js`) |
+| `ADMIN_SESSION_SECRET` | Vercel env (Production, Preview); local `.env` | HMAC key signing the `admin_session` cookie |
 
 Never echo any of these values in output, logs, commits, or chat. Rotate the Supabase DB password (and
 update both env locations) if it's ever pasted somewhere outside a private, trusted channel.
@@ -87,9 +89,10 @@ exists, so make that switch deliberately, not incrementally.
 - **Don't run `next build` while `next dev` is running** — both write to `.next/` and a concurrent build
   corrupts the dev server's cache (manifests as random 500s until the dev server is restarted). Stop dev,
   build, then restart dev.
-- `app/admin` has no authentication (see `.claude/agents/finsec-analyst.md`) — it is now live at
-  `/admin` on the public prod URL with **zero access control**. Anyone with the URL can see every
-  customer's name/email/phone/address and change order status. This is the top-priority follow-up.
+- `/admin` is gated as of 2026-09-15 — single shared password (`ADMIN_PASSWORD`) + signed session
+  cookie (`middleware.js`, `lib/adminAuth.js`, `/admin/login`). Not per-user accounts; revisit if more
+  than one person needs distinguishable access. See `.claude/agents/finsec-analyst.md` for the fuller
+  security note.
 
 ## Prod-state snapshot
 
@@ -99,3 +102,6 @@ exists, so make that switch deliberately, not incrementally.
   optimization) confirmed working in production.
 - Database: schema pushed via `prisma db push`, seeded via `node prisma/seed.js` — full catalog (20
   products across 5 collections) and sample orders live in the Supabase production database.
+- 2026-09-15 (same day, follow-up deploy): added `/admin` password gate (see Gotchas and Credential
+  inventory above). Verified via headless-browser test against prod: wrong password rejected, correct
+  password reaches the dashboard, session persists across reload, logout clears it and re-locks `/admin`.

@@ -1,7 +1,31 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { cookies } from "next/headers";
 import { db } from "../lib/db";
+import { createSessionToken } from "../lib/adminAuth";
+
+export async function adminLogin(password) {
+  if (!process.env.ADMIN_PASSWORD || !process.env.ADMIN_SESSION_SECRET) {
+    return { error: "Admin login is not configured (missing ADMIN_PASSWORD/ADMIN_SESSION_SECRET)." };
+  }
+  if (!password || password !== process.env.ADMIN_PASSWORD) {
+    return { error: "Incorrect password." };
+  }
+  const token = await createSessionToken(process.env.ADMIN_SESSION_SECRET);
+  cookies().set("admin_session", token, {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "lax",
+    path: "/",
+    maxAge: 8 * 60 * 60,
+  });
+  return { ok: true };
+}
+
+export async function adminLogout() {
+  cookies().set("admin_session", "", { path: "/", maxAge: 0 });
+}
 
 function serializeOrder(order) {
   return {

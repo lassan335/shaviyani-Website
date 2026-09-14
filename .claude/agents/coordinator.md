@@ -55,10 +55,9 @@ if it drifts.
 - **Reviews required before anything ships:**
   - Any change to `app/actions.js`, `app/checkout/**`, `app/api/**`, or `prisma/schema.prisma` (money
     fields, order creation, customer PII) → `finsec-analyst`.
-  - **Known gap, flag on every relevant task:** `/admin` has no authentication and is now **publicly
-    reachable** at the live prod URL — anyone with the link can view customer PII and change order
-    status. Any task touching `/admin` should note this; a task to add admin auth should be treated as
-    high priority, not routine.
+  - `/admin` is now gated (password + signed session cookie, shipped 2026-09-15 — see
+    `middleware.js`/`lib/adminAuth.js`). It's a single shared password, not per-user accounts, so a task
+    to add real multi-user auth is still worth prioritizing once more than one person needs access.
   - UI/visual changes → no dedicated UX agent configured yet; call it out as a manual check.
 - **Branch convention:** feature branches off `master`; PRs target `master`. Remember a merge alone
   doesn't deploy — flag when a merged task still needs someone to run `vercel --prod`.
