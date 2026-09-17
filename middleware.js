@@ -13,9 +13,9 @@ export async function middleware(request) {
   }
 
   const token = request.cookies.get("admin_session")?.value;
-  const valid = await verifySessionToken(token, process.env.ADMIN_SESSION_SECRET);
+  const session = await verifySessionToken(token, process.env.ADMIN_SESSION_SECRET);
 
-  if (!valid) {
+  if (!session) {
     const loginUrl = new URL("/admin/login", request.url);
     loginUrl.searchParams.set("next", pathname);
     return NextResponse.redirect(loginUrl);

@@ -2,7 +2,19 @@
 
 import { useState, useMemo, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import { ChevronDown, ChevronRight, Plus, X, LogOut } from "lucide-react";
+import Link from "next/link";
+import {
+  ChevronDown,
+  ChevronRight,
+  Plus,
+  X,
+  LogOut,
+  FileText,
+  Settings,
+  Package,
+  LayoutGrid,
+  Image as ImageIcon,
+} from "lucide-react";
 import { currency, formatDate } from "../../lib/format";
 import { STATUSES, STATUS_COLOR } from "../../lib/orderStatus";
 import StatusTrack from "../../components/StatusTrack";
@@ -250,7 +262,22 @@ export default function AdminDashboard({ initialOrders, quotes }) {
           <div className="headerTitle">Order Pipeline</div>
           <div className="headerSub">Shaviyani Pro — internal dashboard</div>
         </div>
-        <div style={{ display: "flex", gap: 8 }}>
+        <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+          <Link href="/admin/products" className="btn btnOutlineDark">
+            <Package size={15} /> Products
+          </Link>
+          <Link href="/admin/collections" className="btn btnOutlineDark">
+            <LayoutGrid size={15} /> Collections
+          </Link>
+          <Link href="/admin/content" className="btn btnOutlineDark">
+            <ImageIcon size={15} /> Homepage
+          </Link>
+          <Link href="/admin/quote-generator" className="btn btnOutlineDark">
+            <FileText size={15} /> Quote Generator
+          </Link>
+          <Link href="/admin/settings" className="btn btnOutlineDark">
+            <Settings size={15} /> Settings
+          </Link>
           <button className="btn btnDark" onClick={() => setShowModal(true)}>
             <Plus size={15} /> New order
           </button>

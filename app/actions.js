@@ -3,16 +3,35 @@
 import { revalidatePath } from "next/cache";
 import { cookies } from "next/headers";
 import { db } from "../lib/db";
-import { createSessionToken } from "../lib/adminAuth";
+import { createSessionToken, verifySessionToken, hashPassword, verifyPassword } from "../lib/adminAuth";
 
-export async function adminLogin(password) {
-  if (!process.env.ADMIN_PASSWORD || !process.env.ADMIN_SESSION_SECRET) {
-    return { error: "Admin login is not configured (missing ADMIN_PASSWORD/ADMIN_SESSION_SECRET)." };
+const USERNAME_RE = /^[a-zA-Z0-9_.-]{3,32}$/;
+
+export async function adminLogin(username, password) {
+  if (!process.env.ADMIN_SESSION_SECRET) {
+    return { error: "Admin login is not configured (missing ADMIN_SESSION_SECRET)." };
   }
-  if (!password || password !== process.env.ADMIN_PASSWORD) {
-    return { error: "Incorrect password." };
+  const uname = (username || "").trim();
+  if (!uname || !password) {
+    return { error: "Enter both a username and password." };
   }
-  const token = await createSessionToken(process.env.ADMIN_SESSION_SECRET);
+
+  const user = await db.adminUser.findUnique({ where: { username: uname } });
+
+  if (user) {
+    const ok = await verifyPassword(password, user.salt, user.passwordHash);
+    if (!ok) return { error: "Incorrect username or password." };
+  } else {
+    // Bootstrap fallback: no AdminUser rows exist yet anywhere, or this
+    // particular username doesn't — allow the original env-based admin
+    // login so a fresh deploy isn't locked out before creating a real user.
+    const anyUser = await db.adminUser.findFirst();
+    if (anyUser || uname !== "admin" || !process.env.ADMIN_PASSWORD || password !== process.env.ADMIN_PASSWORD) {
+      return { error: "Incorrect username or password." };
+    }
+  }
+
+  const token = await createSessionToken(process.env.ADMIN_SESSION_SECRET, uname);
   cookies().set("admin_session", token, {
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
@@ -25,6 +44,69 @@ export async function adminLogin(password) {
 
 export async function adminLogout() {
   cookies().set("admin_session", "", { path: "/", maxAge: 0 });
+}
+
+async function currentAdminUsername() {
+  const token = cookies().get("admin_session")?.value;
+  const session = await verifySessionToken(token, process.env.ADMIN_SESSION_SECRET);
+  return session?.username || null;
+}
+
+export async function currentAdminUser() {
+  return { username: await currentAdminUsername() };
+}
+
+export async function listAdminUsers() {
+  const users = await db.adminUser.findMany({ orderBy: { createdAt: "asc" } });
+  return users.map((u) => ({ username: u.username, createdAt: u.createdAt.toISOString() }));
+}
+
+export async function changeAdminPassword(currentPassword, newPassword) {
+  const username = await currentAdminUsername();
+  if (!username) return { error: "Not logged in." };
+  if (!newPassword || newPassword.length < 8) {
+    return { error: "New password must be at least 8 characters." };
+  }
+
+  const user = await db.adminUser.findUnique({ where: { username } });
+
+  if (user) {
+    const ok = await verifyPassword(currentPassword, user.salt, user.passwordHash);
+    if (!ok) return { error: "Current password is incorrect." };
+    const { salt, passwordHash } = await hashPassword(newPassword);
+    await db.adminUser.update({ where: { username }, data: { salt, passwordHash } });
+  } else {
+    // Logged in via the env-based bootstrap fallback (no AdminUser row for
+    // this username yet) — verify against ADMIN_PASSWORD, then create the row.
+    if (!process.env.ADMIN_PASSWORD || currentPassword !== process.env.ADMIN_PASSWORD) {
+      return { error: "Current password is incorrect." };
+    }
+    const { salt, passwordHash } = await hashPassword(newPassword);
+    await db.adminUser.create({ data: { username, salt, passwordHash } });
+  }
+
+  return { ok: true };
+}
+
+export async function createAdminUser(username, password) {
+  const requester = await currentAdminUsername();
+  if (!requester) return { error: "Not logged in." };
+
+  const uname = (username || "").trim();
+  if (!USERNAME_RE.test(uname)) {
+    return { error: "Username must be 3-32 characters: letters, numbers, underscore, dot or hyphen." };
+  }
+  if (!password || password.length < 8) {
+    return { error: "Password must be at least 8 characters." };
+  }
+
+  const existing = await db.adminUser.findUnique({ where: { username: uname } });
+  if (existing) return { error: "That username is already taken." };
+
+  const { salt, passwordHash } = await hashPassword(password);
+  await db.adminUser.create({ data: { username: uname, salt, passwordHash } });
+  revalidatePath("/admin/settings");
+  return { ok: true };
 }
 
 function serializeOrder(order) {

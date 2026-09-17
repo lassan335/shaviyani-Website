@@ -6,6 +6,7 @@ import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { ShoppingBag, Menu, X } from "lucide-react";
 import { useCart } from "../lib/cart-context";
+import ThemeToggle from "./ThemeToggle";
 
 const LINKS = [
   { href: "/order", label: "Order a Jersey" },
@@ -44,6 +45,7 @@ export default function Nav() {
           ))}
         </div>
         <div className="navRight">
+          <ThemeToggle />
           <Link href="/cart" className="bagBtn" aria-label="Cart">
             <ShoppingBag size={20} />
             {count > 0 && <span className="bagCount">{count}</span>}

@@ -89,3 +89,57 @@ model QuoteItem {
   size           String
   qty            Int
 }
+
+// Singleton row (id always "zoho") holding the Zoho Books OAuth tokens for
+// the jersey quote generator in /admin/quote-generator.
+model ZohoToken {
+  id           String   @id @default("zoho")
+  accessToken  String
+  refreshToken String
+  expiresAt    DateTime
+  updatedAt    DateTime @updatedAt
+}
+
+// Admin accounts for /admin. Until at least one row exists, adminLogin()
+// falls back to the ADMIN_PASSWORD env var (username "admin") so a fresh
+// deploy can still log in and create its first real user from /admin/settings.
+model AdminUser {
+  id           String   @id @default(cuid())
+  username     String   @unique
+  passwordHash String
+  salt         String
+  createdAt    DateTime @default(now())
+}
+
+// Storefront collections (was a hardcoded array in lib/collections.js),
+// now editable from /admin/collections. Product.collection stores the
+// collection's *name* (a loose string reference, not a foreign key) to
+// match how products already reference collections.
+model Collection {
+  id           String   @id @default(cuid())
+  slug         String   @unique
+  name         String
+  blurb        String?
+  gradientFrom String
+  gradientTo   String
+  order        Int      @default(0)
+  createdAt    DateTime @default(now())
+}
+
+// Singleton row (id always "home") holding the homepage hero + campaign
+// section copy, editable from /admin/content instead of hardcoded JSX.
+model SiteContent {
+  id                  String   @id @default("home")
+  heroKicker          String
+  heroTitleLine1      String
+  heroTitleAccent     String
+  heroBody            String
+  heroTrustLine       String
+  heroImage           String?
+  campaignKicker      String
+  campaignTitleLine1  String
+  campaignTitleAccent String
+  campaignBody        String
+  campaignImage        String?
+  updatedAt           DateTime @updatedAt
+}

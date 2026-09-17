@@ -1,0 +1,82 @@
+{
+  "_comment": "Prices in MVR. tiers.<tier>.jerseyRates: Material -> Jersey Type -> Sleeve -> price. accessories: flat-rate add-ons (no material/sleeve).",
+  "currency": "MVR",
+  "tiers": {
+    "Standard": {
+      "jerseyRates": {
+        "Wetlook": {
+          "Adult Jersey Only": { "Short Sleeve": 180, "Long Sleeve": 190 },
+          "Adult Jersey With Short": { "Short Sleeve": 250, "Long Sleeve": 260 },
+          "Kids Jersey Only": { "Short Sleeve": 160, "Long Sleeve": 170 },
+          "Kids Jersey With Short": { "Short Sleeve": 230, "Long Sleeve": 240 },
+          "Muslima": { "Long Sleeve": 220 }
+        },
+        "Jacquard": {
+          "Adult Jersey Only": { "Short Sleeve": 200, "Long Sleeve": 210 },
+          "Adult Jersey With Short": { "Short Sleeve": 280, "Long Sleeve": 290 },
+          "Kids Jersey Only": { "Short Sleeve": 180, "Long Sleeve": 190 },
+          "Kids Jersey With Short": { "Short Sleeve": 260, "Long Sleeve": 270 },
+          "Muslima": { "Long Sleeve": 240 }
+        },
+        "Honeycomb": {
+          "Adult Jersey Only": { "Short Sleeve": 200, "Long Sleeve": 210 },
+          "Adult Jersey With Short": { "Short Sleeve": 280, "Long Sleeve": 290 },
+          "Kids Jersey Only": { "Short Sleeve": 180, "Long Sleeve": 190 },
+          "Kids Jersey With Short": { "Short Sleeve": 260, "Long Sleeve": 270 },
+          "Muslima": { "Long Sleeve": 240 }
+        },
+        "Baby PK": {
+          "Corporate T Shirt": { "Short Sleeve": 200, "Long Sleeve": 210 },
+          "Muslima": { "Long Sleeve": 250 }
+        },
+        "Waffle": {
+          "Corporate T Shirt": { "Short Sleeve": 210, "Long Sleeve": 220 },
+          "Muslima": { "Long Sleeve": 260 }
+        }
+      },
+      "accessories": {
+        "Socks Sleeve": 90,
+        "Grip Socks": 190,
+        "Bag": 250
+      }
+    },
+    "Discounted": {
+      "jerseyRates": {
+        "Wetlook": {
+          "Adult Jersey Only": { "Short Sleeve": 170, "Long Sleeve": 180 },
+          "Adult Jersey With Short": { "Short Sleeve": 240, "Long Sleeve": 250 },
+          "Kids Jersey Only": { "Short Sleeve": 150, "Long Sleeve": 160 },
+          "Kids Jersey With Short": { "Short Sleeve": 220, "Long Sleeve": 230 },
+          "Muslima": { "Long Sleeve": 210 }
+        },
+        "Jacquard": {
+          "Adult Jersey Only": { "Short Sleeve": 190, "Long Sleeve": 200 },
+          "Adult Jersey With Short": { "Short Sleeve": 270, "Long Sleeve": 280 },
+          "Kids Jersey Only": { "Short Sleeve": 170, "Long Sleeve": 180 },
+          "Kids Jersey With Short": { "Short Sleeve": 250, "Long Sleeve": 260 },
+          "Muslima": { "Long Sleeve": 230 }
+        },
+        "Honeycomb": {
+          "Adult Jersey Only": { "Short Sleeve": 190, "Long Sleeve": 200 },
+          "Adult Jersey With Short": { "Short Sleeve": 270, "Long Sleeve": 280 },
+          "Kids Jersey Only": { "Short Sleeve": 170, "Long Sleeve": 180 },
+          "Kids Jersey With Short": { "Short Sleeve": 250, "Long Sleeve": 260 },
+          "Muslima": { "Long Sleeve": 230 }
+        },
+        "Baby PK": {
+          "Corporate T Shirt": { "Short Sleeve": 190, "Long Sleeve": 200 },
+          "Muslima": { "Long Sleeve": 240 }
+        },
+        "Waffle": {
+          "Corporate T Shirt": { "Short Sleeve": 200, "Long Sleeve": 210 },
+          "Muslima": { "Long Sleeve": 250 }
+        }
+      },
+      "accessories": {
+        "Socks Sleeve": 80,
+        "Grip Socks": 180,
+        "Bag": 240
+      }
+    }
+  }
+}

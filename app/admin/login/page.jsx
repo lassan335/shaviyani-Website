@@ -5,6 +5,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { adminLogin } from "../../actions";
 
 function LoginForm() {
+  const [username, setUsername] = useState("admin");
   const [password, setPassword] = useState("");
   const [error, setError] = useState(null);
   const [submitting, setSubmitting] = useState(false);
@@ -15,7 +16,7 @@ function LoginForm() {
     e.preventDefault();
     setSubmitting(true);
     setError(null);
-    const result = await adminLogin(password);
+    const result = await adminLogin(username, password);
     setSubmitting(false);
     if (result.error) {
       setError(result.error);
@@ -28,11 +29,19 @@ function LoginForm() {
   return (
     <form onSubmit={submit}>
       <label className="field full">
+        <span>Username</span>
+        <input
+          required
+          autoFocus
+          value={username}
+          onChange={(e) => setUsername(e.target.value)}
+        />
+      </label>
+      <label className="field full">
         <span>Password</span>
         <input
           type="password"
           required
-          autoFocus
           value={password}
           onChange={(e) => setPassword(e.target.value)}
         />

@@ -12,3 +12,7 @@ npm-debug.log*
 
 .vercel
 .env*
+
+# Local-dev-only image uploads (lib/upload.js falls back here when
+# BLOB_READ_WRITE_TOKEN isn't set; production uploads go to Vercel Blob instead)
+public/uploads/

@@ -1,18 +1,18 @@
 import { notFound } from "next/navigation";
 import { db } from "../../../lib/db";
 import ProductCard from "../../../components/ProductCard";
-import { COLLECTIONS, collectionSlugToName } from "../../../lib/collections";
 
-export function generateStaticParams() {
-  return COLLECTIONS.map((c) => ({ slug: c.slug }));
+export async function generateStaticParams() {
+  const collections = await db.collection.findMany({ select: { slug: true } });
+  return collections.map((c) => ({ slug: c.slug }));
 }
 
 export default async function CollectionPage({ params }) {
-  const meta = COLLECTIONS.find((c) => c.slug === params.slug);
+  const meta = await db.collection.findUnique({ where: { slug: params.slug } });
   if (!meta) notFound();
 
   const products = await db.product.findMany({
-    where: { collection: collectionSlugToName(params.slug) },
+    where: { collection: meta.name },
     orderBy: { name: "asc" },
   });
 

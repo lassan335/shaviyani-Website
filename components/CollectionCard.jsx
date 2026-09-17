@@ -15,7 +15,7 @@ export default function CollectionCard({ collection }) {
     <Link
       href={`/collections/${collection.slug}`}
       className="collectionCard"
-      style={{ background: collection.gradient }}
+      style={{ background: `linear-gradient(135deg, ${collection.gradientFrom}, ${collection.gradientTo})` }}
     >
       <div className="collectionCardTop">
         <div className="collectionCardIcon">
